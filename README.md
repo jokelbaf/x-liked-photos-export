@@ -4,6 +4,9 @@ A simple tool that allows you download all your liked photos from X (Twitter).
 
 ## Usage
 
+> [!WARNING]  
+> If you are logged in in multiple browsers with different accounts, you might get a 403 error because of cookies mismatch. In this case, you should provide the cookies manually, as shown [below](#cookies).
+
 1. Download prebuilt binary from [here](https://github.com/jokelbaf/x-liked-photos-export/releases/latest).
 2. Go to [x.com](https://x.com) and authorize.
 3. Open devtools via `F12` and go to `Network` tab.
