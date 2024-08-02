@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "x-liked-photos-export"
-version = "0.1.0"
+version = "0.1.1"
 description = "A simple tool that allows you download all your liked photos from X (Twitter)."
 authors = ["jokelbaf <60827680+JokelBaf@users.noreply.github.com>"]
 readme = "README.md"
