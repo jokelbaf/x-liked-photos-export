@@ -282,6 +282,7 @@ async def main() -> None:
     """Entry point."""
     args = get_args()
     cookies = parse_cookies(args.cookies) if args.cookies else cookies_to_mapping(rookiepy.load())
+    path = args.path or pathlib.Path.cwd()
     
     if missing_cookies := check_cookies(cookies):
         logger.error(f"The following required cookies are missing: {", ".join(missing_cookies)}")
@@ -291,10 +292,10 @@ async def main() -> None:
     images = await collect_images_urls(cookies, args.token, progress=progress)
     progress.close()
 
-    save_to_file(images, args.path or pathlib.Path.cwd())
+    save_to_file(images, path)
 
     if args.download:
-        await download_images(images, args.path)
+        await download_images(images, path)
 
     logger.info("Report success")
 
