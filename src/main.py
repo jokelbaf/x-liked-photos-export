@@ -133,6 +133,16 @@ def parse_cookies(cookies: str) -> typing.Mapping[str, typing.Any]:
     return {k: v.value for k, v in cookie.items()}
 
 
+def check_cookies(cookies: typing.Mapping[str, str]) -> typing.List[str]:
+    """Check if cookies are valid.
+    
+    :param cookies: The cookies to check.
+    :return: A list of missing cookies.
+    """
+    required_cookies = ["auth_token", "ct0", "twid"]
+    return [cookie for cookie in required_cookies if cookie not in cookies]
+
+
 def get_bottom_cursor(data: typing.Dict[str, typing.Any]) -> str | None:
     """Get the bottom cursor.
     
@@ -272,6 +282,10 @@ async def main() -> None:
     """Entry point."""
     args = get_args()
     cookies = parse_cookies(args.cookies) if args.cookies else cookies_to_mapping(rookiepy.load())
+    
+    if missing_cookies := check_cookies(cookies):
+        logger.error(f"The following required cookies are missing: {", ".join(missing_cookies)}")
+        sys.exit(1)
 
     progress = tqdm(desc="Fetching images", unit="")
     images = await collect_images_urls(cookies, args.token, progress=progress)
