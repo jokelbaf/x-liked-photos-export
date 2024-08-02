@@ -44,3 +44,21 @@ x-liked-photos-export-x64.exe --cookies <cookies> --token <token>
 > ```
 > cookie1=value1; cookie2=value2; ...
 > ```
+
+## Building from source
+
+To build the project you are going to need python 3.12+ and poetry installed.
+
+Run the following commands to setup the project:
+```bash
+git clone https://github.com/jokelbaf/x-liked-photos-export.git
+cd x-liked-photos-export
+poetry install
+```
+
+To build the project run:
+```bash
+pyinstaller --onefile --icon=assets/icon.ico src/main.py --name=x-liked-photos-export-x64
+```
+
+Your binary will be located in the `dist` folder.
