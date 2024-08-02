@@ -1,6 +1,10 @@
-# x-liked-photos-export
+<p align="center">
+  <img src="/assets/icon.ico" />
+</p>
 
-A simple tool that allows you download all your liked photos from X (Twitter).
+<h1 align="center">x-liked-photos-export</h1>
+
+<p align="center">A simple tool that allows you download all your liked photos from X (Twitter).</p>
 
 ## Usage
 
