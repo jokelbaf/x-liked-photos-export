@@ -7,6 +7,7 @@ import json
 import yarl
 import os
 import pathlib
+from http.cookies import SimpleCookie
 
 import aiohttp
 import rookiepy
@@ -26,7 +27,6 @@ HEADERS: typing.Mapping[str, str] = {
 
 QUERY: typing.Dict[str, typing.Dict[str, typing.Any]] = {
     "variables": {
-        "userId": "1646623670968754176",
         "count": 100,
         "includePromotedContent": False,
         "withClientEventToken": False,
@@ -70,6 +70,7 @@ QUERY: typing.Dict[str, typing.Dict[str, typing.Any]] = {
 def get_query(
     data: typing.Dict[str, typing.Dict[str, typing.Any]],
     *,
+    user_id: str,
     cursor: str | None = None,
 ) -> typing.Dict[str, str]:
     """Obtain query.
@@ -77,13 +78,15 @@ def get_query(
     :param data: The data to convert to a query.
     :return: The query.
     """
-    return {
-        key: json.dumps(
-            {"cursor": cursor, **value} if key == "variables" and cursor is not None else value,
-            separators=(",", ":")
-        )
-        for key, value in data.items()
-    }
+    query: typing.Dict[str, str] = {}
+    for key, value in data.items():
+        if key == "variables" and cursor is not None:
+            value = {"cursor": cursor, "userId": user_id, **value}
+        elif key == "variables":
+            value = {"userId": user_id, **value}
+        query[key] = json.dumps(value, separators=(",", ":"))
+
+    return query
 
 
 def find_values_by_key(data: typing.Dict[str, typing.Any], target_key: str) -> typing.List[str]:
@@ -119,6 +122,17 @@ def cookies_to_mapping(cookies: rookiepy.CookieList) -> typing.Mapping[str, typi
     return {cookie["name"]: cookie["value"] for cookie in cookies if cookie["domain"] == ".x.com"}
 
 
+def parse_cookies(cookies: str) -> typing.Mapping[str, typing.Any]:
+    """Parse cookies from raw string to dict.
+    
+    :param cookies: The cookies to parse.
+    :return: Parsed cookies.
+    """
+    cookie = SimpleCookie()
+    cookie.load(cookies)
+    return {k: v.value for k, v in cookie.items()}
+
+
 def get_bottom_cursor(data: typing.Dict[str, typing.Any]) -> str | None:
     """Get the bottom cursor.
     
@@ -142,7 +156,7 @@ def get_bottom_cursor(data: typing.Dict[str, typing.Any]) -> str | None:
 
 
 async def collect_images_urls(
-    cookies: typing.Mapping[str, str] | str,
+    cookies: typing.Mapping[str, str],
     token: str,
     *,
     cursor: str | None = None,
@@ -154,20 +168,17 @@ async def collect_images_urls(
     :param token: The token to use.
     :return: The images URLs.
     """
-    query = get_query(QUERY, cursor=cursor)
+    query = get_query(QUERY, user_id=cookies["twid"][4:], cursor=cursor)
     url = yarl.URL(URL).with_query(query)
     async with (
         aiohttp.ClientSession(
-            headers={
-                **HEADERS,
-                "x-csrf-token": token,
-                **({"cookie": HEADERS["cookie"]} if isinstance(cookies, str) else {}),
-            },
-            cookies=cookies if isinstance(cookies, dict) else None
+            headers={**HEADERS, "x-csrf-token": token},
+            cookies=cookies,
         ) as session,
         session.get(url) as response
     ):
         if not response.ok:
+            progress.clear()
             logger.error(f"Failed to fetch data: {response.status}")
             sys.exit(1)
 
@@ -260,7 +271,7 @@ def get_args() -> argparse.Namespace:
 async def main() -> None:
     """Entry point."""
     args = get_args()
-    cookies = args.cookies or cookies_to_mapping(rookiepy.load())
+    cookies = parse_cookies(args.cookies) if args.cookies else cookies_to_mapping(rookiepy.load())
 
     progress = tqdm(desc="Fetching images", unit="")
     images = await collect_images_urls(cookies, args.token, progress=progress)
