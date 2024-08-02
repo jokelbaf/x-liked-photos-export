@@ -18,7 +18,7 @@
 5. Go to the folder where you downloaded the binary, open terminal and run the following command:
 
 ```bash
-./x-liked-photos-export-win-x64.exe --token <token>
+x-liked-photos-export-x64.exe --token <token>
 ```
 
 This will fetch all posts you liked and generate a **data.json** file with links to the photos.
@@ -28,7 +28,7 @@ This will fetch all posts you liked and generate a **data.json** file with links
 In case you want to download the photos, add `--download` flag:
 
 ```bash
-./x-liked-photos-export-win-x64.exe --token <token> --download
+x-liked-photos-export-x64.exe --token <token> --download
 ```
 
 ## Cookies
@@ -36,7 +36,7 @@ In case you want to download the photos, add `--download` flag:
 By default the tool will extract the cookies from your browser to perform requests to the API on your behalf. If you want to provide the cookies manually, you can do so by using the `--cookies` flag:
 
 ```bash
-./x-liked-photos-export-win-x64.exe --cookies <cookies> --token <token>
+x-liked-photos-export-x64.exe --cookies <cookies> --token <token>
 ```
 
 > [!NOTE]  
